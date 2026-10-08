@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elias Hotel</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  color: #1f2937;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-top: 15px;
+  border-radius: 15px;
+  box-shadow: 0 3px 10px #ccc;
+}
+
+input, button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+
+.total {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🏨 Elias Hotel</h1>
+
+<div class="card">
+
+<h2>ሽያጭ መመዝገቢያ</h2>
+
+<label>የእቃ ስም</label>
+<input id="product" type="text" placeholder="ለምሳሌ St. George">
+
+<label>ብዛት</label>
+<input id="quantity" type="number" placeholder="0">
+
+<label>የአንዱ ዋጋ</label>
+<input id="price" type="number" placeholder="0">
+
+<div class="total">
+ጠቅላላ፦ <span id="total">0</span> ብር
+</div>
+
+<button onclick="saveSale()">ሽያጭ መዝግብ</button>
+
+</div>
+
+<div class="card">
+
+<h2>📊 ሪፖርት</h2>
+
+<p>ዛሬ ሽያጭ፦ <b id="todayTotal">0</b> ብር</p>
+
+<p>ይህ ወር ሽያጭ፦ <b id="monthTotal">0</b> ብር</p>
+
+</div>
+
+<div class="card">
+
+<h2>📋 የሽያጭ ታሪክ</h2>
+
+<div id="history"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let sales = JSON.parse(localStorage.getItem("sales") || "[]");
+
+function calculate() {
+  let q = Number(document.getElementById("quantity").value);
+  let p = Number(document.getElementById("price").value);
+
+  document.getElementById("total").innerText = q * p;
+}
+
+document.getElementById("quantity").addEventListener("input", calculate);
+document.getElementById("price").addEventListener("input", calculate);
+
+function saveSale() {
+
+  let product = document.getElementById("product").value;
+  let quantity = Number(document.getElementById("quantity").value);
+  let price = Number(document.getElementById("price").value);
+
+  if (!product  quantity <= 0  price <= 0) {
+    alert("እባክህ ሁሉንም መረጃ ሙላ");
+    return;
+  }
+
+  let sale = {
+    product: product,
+    quantity: quantity,
+    price: price,
+    total: quantity * price,
+    date: new Date().toISOString()
+  };
+
+  sales.push(sale);
+
+  localStorage.setItem("sales", JSON.stringify(sales));
+
+  document.getElementById("product").value = "";
+  document.getElementById("quantity").value = "";
+  document.getElementById("price").value = "";
+
+  calculate();
+  showHistory();
+
+  alert("ሽያጩ ተመዝግቧል!");
+}
+
+function showHistory() {
+
+  let history = document.getElementById("history");
+
+  history.innerHTML = "";
+
+  let today = new Date().toDateString();
+  let month = new Date().getMonth();
+  let year = new Date().getFullYear();
+
+  let todayTotal = 0;
+  let monthTotal = 0;
+
+  sales.slice().reverse().forEach(sale => {
+
+    let d = new Date(sale.date);
+
+    if (d.toDateString() === today) {
+      todayTotal += sale.total;
+    }
+
+    if (d.getMonth() === month && d.getFullYear() === year) {
+      monthTotal += sale.total;
+    }
+
+    let item = document.createElement("p");
+
+    item.innerHTML =
+      <b>${sale.product}</b> — ${sale.quantity} × ${sale.price} = ${sale.total} ብር<br>
+      <small>${d.toLocaleString()}</small>;
+
+    history.appendChild(item);
+  });
+
+  document.getElementById("todayTotal").innerText = todayTotal;
+  document.getElementById("monthTotal").innerText = monthTotal;
+}
+
+showHistory();
+
+</script>
+
+</body>
+</html>
